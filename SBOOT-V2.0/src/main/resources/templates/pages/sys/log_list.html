@@ -1,0 +1,149 @@
+<div class="row">
+	<div class="col-xs-12">
+		<div class="box">
+			<div class="box-header">
+				<h3 class="box-title">日志管理</h3>
+				<div class="box-tools">
+					<div class="input-group input-group-sm" style="width: 350px;">
+						<input type="text" name="table_search" id="searchNameId"
+							class="form-control pull-right" placeholder="用户名">
+
+						<div class="input-group-btn">
+							<button type="button" class="btn btn-default btn-search">
+								<i class="fa fa-search"></i>
+							</button>
+							<button type="button" class="btn btn-default btn-delete">删除</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- /.box-header -->
+			<div class="box-body table-responsive no-padding">
+				<table class="table table-hover">
+					<thead>
+						<tr>
+							<th><input type="checkbox" id="checkAll">全选</th>
+							<th>用户名</th>
+							<th>操作</th>
+							<th>请求方法</th>
+							<th>请求参数</th>
+							<th>IP</th>
+							<th>执行时长</th>
+						</tr>
+					</thead>
+					<tbody id="tbodyId">
+						<tr>
+							<td colspan="7">数据正在加载中...</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div id="pageId" class="box-footer clearfix"
+				th:include="common/page.html :: page"></div>
+			<!-- /.box-body -->
+		</div>
+		<!-- /.box -->
+	</div>
+</div>
+<script type="text/javascript">
+  $(function(){
+	  doGetObjects()
+	  $(".input-group-btn").on("click",".btn-search",doQueryObjects)
+	  $(".input-group-btn").on("click",".btn-delete",doDeleteObjects)
+	  $("#checkAll").click(docheckedAll)
+  })
+  //发送请求获取日志数据
+  function doGetObjects(){
+	  var url="log/doFindPageObject"
+	  //获取当前页
+	  var pageCurrent=$("#pageId").data("pageCurrent");
+	  pageCurrent=!pageCurrent?1:pageCurrent
+	  var params={"pageCurrent":pageCurrent}
+	  var username=$("#searchNameId").val()
+	  params.username=!username?"":username
+	  $.getJSON(url,params,function(result){
+		  console.log("result",result)
+		  doHanderResponseResult(result)
+	  })
+	  $("#checkAll").prop("checked",false)
+  }
+  //处理日志数据
+  function doHanderResponseResult(result){
+	  if(result.state==0)$("#tbodyId").html("<tr><td colspan='7'>"+result.message+"</td></tr>")
+	  if(result.state==1){
+		  //message=ok更新数据到页面
+		  doSetTableBodyRows(result.data.records)
+		  //更新页面导航栏信息
+		  doSetPagination(result.data)
+		  //注册复选框点击事件
+		   $("input[name='ids']").click(docheckedAll)
+	  }
+  }
+  //构建数据表格
+  function doSetTableBodyRows(records){
+	  var tBody=$("#tbodyId")
+	  tBody.empty()//清空元素内容
+	  for(var i in records){
+		  var tr=$("<tr></tr>");
+		  var tds=doCreateTds(records[i]);
+		  tr.append(tds);
+		  tBody.append(tr);
+	  }
+  }
+  //创建表格内容
+  function doCreateTds(data){
+	  var tds="<td><input type='checkbox' class='cBox' name='ids' value='"+data.id+"'></td>"+
+	  "<td>"+data.username+"</td>"+
+	  "<td>"+data.operation+"</td>"+
+	  "<td>"+data.method+"</td>"+
+	  "<td>"+data.params+"</td>"+
+	  "<td>"+data.ip+"</td>"+
+	  "<td>"+data.time+"</td>";
+	  return tds;
+  }
+  
+  //用户点击查询触发事件回调函数
+  function doQueryObjects(e){
+	  //初始化当前页
+	  $("#pageId").data("pageCurrent",1);
+	  //重新查询数据
+	  doGetObjects();
+	  console.log(e)
+  }
+  //删除
+  function doDeleteObjects(e){
+	  //获取选中的id
+	  var ids=getLogIds();
+	  console.log(ids)
+	  var url="log/doDeleteObjects";
+	  var params={"ids":ids.toString()}
+	  $.get(url,params,(result)=>{alert(result.message)//重新加载数据
+		  doGetObjects();})
+	  
+  }
+  function getLogIds(){
+	  var ids=[]
+	  $("#tbodyId tr input").each((index,element)=>{if(element.checked)ids.push(element.value)})
+  	  return ids
+  }
+  //处理全选
+  function docheckedAll(e){
+	  if(e.target.id=="checkAll"){
+		  $("#tbodyId tr input").each((index,element)=>{
+			  element.checked=e.target.checked
+		  })
+	  }
+	  var pageSize=$("#tbodyId tr input").length
+	  pageSize=pageSize?pageSize:0;
+	  if(getLogIds().length==pageSize)
+		  $("#checkAll").prop("checked",true)
+	  else
+		  $("#checkAll").prop("checked",false)
+  }
+</script>
+
+
+
+
+
+

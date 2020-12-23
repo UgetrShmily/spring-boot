@@ -1,0 +1,60 @@
+<div th:fragment="page">
+	<ul class="pagination pagination-sm no-margin pull-right">
+		<li><a class="first">首页</a></li>
+		<li><a class="pre">上一页</a></li>
+		<li><a class="next">下一页</a></li>
+		<li><a class="last">尾页</a></li>
+		<li><a class="rowCount">总记录数(0)</a></li>
+		<li><a class="pageCount">总页数(0)</a></li>
+		<li><a class="pageCurrent">当前页(1)</a></li>
+	</ul>
+	<script type="text/javascript">
+		$(function() {
+			//注册点击事件
+			$("#pageId").on("click", ".first,.last,.pre,.next",
+					doClickPageButton)
+		})
+		//处理页面导航数据
+		function doSetPagination(data) {
+			//绑定数据到
+			$("#pageId").data("pageSize", data.pageSize);
+			$("#pageId").data("pageCurrent", data.pageCurrent);
+			$("#pageId").data("rowCount", data.rowCount);
+			$("#pageId").data("pageCount", data.pageCount);
+			$(".rowCount").text("总记录数("+data.rowCount+")")
+			$(".pageCount").text("总页数("+data.pageCount+")")
+			$(".pageCurrent").text("当前页("+data.pageCurrent+")")
+		}
+		//页面导航事件注册
+		function doClickPageButton(e) {
+			var cls = $(this).prop("class")
+			var pageCurrent=$("#pageId").data("pageCurrent");
+			var pageCount=$("#pageId").data("pageCount");
+			switch (cls) {
+				case "first":
+					$("#pageId").data("pageCurrent", 1);
+					break;
+				case "last":
+					$("#pageId").data("pageCurrent", pageCount);
+					break;
+				case "pre":
+					pageCurrent=pageCurrent==1?pageCount:pageCurrent-1
+					$("#pageId").data("pageCurrent", pageCurrent);
+					break;
+				case "next":
+					pageCurrent=pageCurrent==pageCount?1:pageCurrent+1
+					$("#pageId").data("pageCurrent",pageCurrent);
+					break;
+			}
+			 
+			doGetObjects();
+		}
+	</script>
+</div>
+
+
+
+
+
+
+

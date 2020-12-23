@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.dao.SysLogDao">
+	<sql id="querylike">
+		<where>
+			<if test="username!=null and username!=''">
+				username like concat("%",#{username},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getRowCount" resultType="int">
+		select count(1) from sys_logs
+		<include refid="querylike" />
+	</select>
+	<select id="findLogsPageByUserName"
+		resultType="com.my.pojo.SysLog">
+		select * from sys_logs
+		<include refid="querylike" />
+		order by createdTime desc
+		limit #{startIndex},#{pageSize}
+	</select>
+	<delete id="deleteByIds">
+		delete from sys_logs
+		<choose>
+			<when test="ids!=null and ids.length>0">
+				<where>
+					<foreach collection="ids" item="id" separator="or">
+						id=#{id}
+					</foreach>
+				</where>
+			</when>
+			<otherwise>
+				where id=-1
+			</otherwise>
+		</choose>
+	</delete>
+	<insert id="insert" parameterType="com.my.pojo.SysLog">
+	insert into sys_logs
+	(username,operation,method,params,time,ip,createdTime)
+	value
+	(#{username},#{operation},#{method},#{params},#{time},#{ip},now())
+	</insert>
+</mapper>

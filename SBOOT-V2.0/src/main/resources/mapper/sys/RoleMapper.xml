@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.dao.SysRoleDao">
+	<sql id="queryByName">
+		<where>
+			<if test="name!=null and name!=''">
+				name like concat("%",#{name},"%")
+			</if>
+		</where>
+	</sql>
+	<select id="getRowCount" resultType="int">
+		select count(*) from sys_roles
+		<include refid="queryByName" />
+	</select>
+	<select id="findPageObjects" resultType="com.my.pojo.SysRole">
+		select * from sys_roles
+		<include refid="queryByName" />
+		order by createdTime desc
+		limit #{startIndex},#{pageSize}
+	</select>
+	<insert id="insertObject" parameterType="com.my.pojo.SysRole">
+		<selectKey order="AFTER" keyProperty="id" resultType="int">
+			select last_insert_id()
+		</selectKey>
+		insert into sys_roles
+		(id,name,note,createdTime,modifiedTime,createdUser,modifiedUser)
+		value
+		(null,#{name},#{note},now(),now(),#{createdUser},#{modifiedUser})
+	</insert>
+	<resultMap type="com.my.vo.SysRoleMenuVo" id="roleMenus">
+		<id property="id" column="id" />
+		<collection property="menuIds"
+			select="com.my.dao.SysRoleMenuDao.findMenuIdsByRoleId" column="id"></collection>
+	</resultMap>
+	<select id="findObjectById" resultMap="roleMenus">
+		select id,name,note from
+		sys_roles where id=#{id}
+	</select>
+	<update id="updateObject" parameterType="com.my.pojo.SysRole">
+		update sys_roles
+		set
+		name=#{name},
+		note=#{note},
+		modifiedUser=#{modifiedUser},
+		modifiedTime=now()
+		where id=#{id}
+	</update>
+	<select id="findObjects"
+		resultType="com.my.common.vo.CheckBox">
+		select id,name
+		from sys_roles
+	</select>
+</mapper>
