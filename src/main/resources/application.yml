@@ -35,4 +35,4 @@ server:
 
 page:
   config:
-    pageSize: 6
+    pageSize: 10
