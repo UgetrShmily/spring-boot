@@ -1,0 +1,33 @@
+package com.my.controller;
+
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.util.StringUtils;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.my.pojo.SysUser;
+@Controller
+@RequestMapping("/")
+public class PageController {
+	@RequestMapping("doIndexUI")
+	public String doIndexUI(Model model) {
+		SysUser user=(SysUser)SecurityUtils.getSubject().getPrincipal();
+		model.addAttribute("user", user);
+		return "starter";
+	}
+	@RequestMapping("/{module}/{modulePage}")
+	public String doLogUI(@PathVariable String modulePage) {
+		return "sys/"+modulePage;
+	}
+	@RequestMapping("/doPageUI")
+	public String doPageUI() {
+		return "common/page";
+	}
+	@RequestMapping("/doLoginUI")
+	public String doLoginUI(){
+			return "login";
+	}
+
+}
